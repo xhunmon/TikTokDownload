@@ -98,7 +98,7 @@ class Download():
 
                     # 检查视频下载情况
                     file_state = self.check.test(
-                        self.path, creat_time, self.author_list[i], ".mp4")
+                        self.path, creat_time, self.author_list[i], ".mp4", profileData)
                     if file_state == True:
                         continue
                     else:

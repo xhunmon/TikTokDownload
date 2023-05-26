@@ -49,6 +49,9 @@ class Profile():
         """
         self.music = param[1]
         self.mode = param[2]
+        # cxh230526: 新增代码
+        self.interval = param[4]
+        self.path = param[6]
         try:
             r = Util.requests.post(url=Util.reFind(param[0])[0])
         except:
@@ -119,8 +122,7 @@ class Profile():
             self.api_post_url = self.urls.USER_FAVORITE_A + datas.params
 
         # 创建用户文件夹
-        self.path = "." + self.sprit + "Download" + self.sprit + \
-            param[2] + self.sprit + self.nickname + self.sprit
+        self.path = self.path + self.sprit + self.nickname + self.sprit
         if not Util.os.path.exists(self.path):
             Util.os.makedirs(self.path)
 

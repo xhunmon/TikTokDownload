@@ -16,6 +16,10 @@ Change Log  :
 -------------------------------------------------
 '''
 
+import os, sys
+
+sys.path.append(os.path.dirname(__file__))
+
 import re
 import os
 import json
