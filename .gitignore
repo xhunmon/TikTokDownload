@@ -140,3 +140,4 @@ readconf.py
 /Util/node_modules/
 1.py
 test.py
+.idea/
