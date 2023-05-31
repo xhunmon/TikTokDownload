@@ -52,11 +52,18 @@ class Download():
         self.max_cursor = profileData.max_cursor
         # 系统分隔符
         self.sprit = profileData.sprit
+        # cxh230527:已下载列表
+        self.nickname = profileData.nickname
+        self.downloads = profileData.downloads
+
         # self.v_info = profileData.v_info
         # self.profile = Profile()
         with Util.progress:
             with Util.ThreadPoolExecutor(max_workers=5) as pool:
                 for i in range(len(self.author_list)):
+                    if i >= len(self.aweme_id):
+                        print('[  🚩🚩  ]:数据异常：index=%d,data=%d' % (i, len(self.aweme_id)))
+                        break
                     # 获取单部视频接口信息
                     try:
                         # 官方接口
@@ -81,7 +88,7 @@ class Download():
                     except Exception as videoNotFound:
                         Util.log.warning(videoNotFound)
                         print('[  🚩🚩  ]:由于官方接口cdn缓存暂没过期，id:%s的视频已经不存在！\r' %
-                                self.aweme_id[i])
+                              self.aweme_id[i])
                         Util.log.warning(
                             f'[  🚩🚩  ]: {self.nickname} 的视频 {self.aweme_id[i]} 下载失败')
                         continue
@@ -97,9 +104,26 @@ class Download():
                             self.author_list[i], len(self.author_list[i])))
 
                     # 检查视频下载情况
-                    file_state = self.check.test(
+                    file_state, finish = self.check.test(
                         self.path, creat_time, self.author_list[i], ".mp4", profileData)
                     if file_state == True:
+                        if 'finish' == finish:  # 当前的视频日期已经小于设定的开始时间，跳出
+                            break
+                        v_url = self.path + creat_time + '.mp4'
+                        tag_names = [tag['tag_name'] for tag in js['aweme_detail']['video_tag']]
+                        tag_name = ','.join(tag_names)
+                        info = {
+                            'author_user_id': js['aweme_detail']['author_user_id'],
+                            'aweme_id': js['aweme_detail']['aweme_id'],
+                            'desc': js['aweme_detail']['desc'],
+                            'duration': js['aweme_detail']['duration'],
+                            'create_time': js['aweme_detail']['create_time'],
+                            'video_tag': tag_name,
+                            'create_time2': creat_time,
+                            'nickname': self.nickname,
+                            'file': v_url,
+                        }
+                        self.downloads.append(info)
                         continue
                     else:
                         pass
@@ -136,8 +160,7 @@ class Download():
                         # 2023/04/20 1080p不再通过拼接uri获取，url_list为1080p
                         self.new_video_list.append(self.url_list[i])
                         try:
-                            v_url = self.path + self.sprit + creat_time + Util.re.sub(
-                                r'[\\/:*?"<>|\r\n] + ', "_", self.author_list[i]) + '.mp4'
+                            v_url = self.path + creat_time + '.mp4'
                             if len(self.author_list[i]) > 20:
                                 filename = creat_time[:10] + self.author_list[i][:20] + "..."
                             else:
@@ -146,6 +169,21 @@ class Download():
                                 "[  视频  ]:", filename=filename, start=False)
                             pool.submit(
                                 Util.copy_url, task_id, self.new_video_list[0], self.author_list[i], v_url)
+
+                            tag_names = [tag['tag_name'] for tag in js['aweme_detail']['video_tag']]
+                            tag_name = ','.join(tag_names)
+                            info = {
+                                'author_user_id': js['aweme_detail']['author_user_id'],
+                                'aweme_id': js['aweme_detail']['aweme_id'],
+                                'desc': js['aweme_detail']['desc'],
+                                'duration': js['aweme_detail']['duration'],
+                                'create_time': js['aweme_detail']['create_time'],
+                                'video_tag': tag_name,
+                                'create_time2': creat_time,
+                                'nickname': self.nickname,
+                                'file': v_url,
+                            }
+                            self.downloads.append(info)
                             Util.log.info(v_url)
                             # 清除每个旧的视频列表
                             self.new_video_list = []
@@ -176,7 +214,7 @@ class Download():
                     self.sprit = Util.sprit
 
                     path = "Download" + self.sprit + "pic" + self.sprit + \
-                        self.nickname + self.sprit + self.create_time + self.desc
+                           self.nickname + self.sprit + self.create_time + self.desc
                     # 检测下载目录是否存在
                     if not Util.os.path.exists(path):
                         Util.os.makedirs(path)
@@ -185,7 +223,7 @@ class Download():
                         # 图片目录
                         p_url = 'Download' + self.sprit + 'pic' + self.sprit + self.nickname + self.sprit + \
                                 self.create_time + self.desc + self.sprit + \
-                            self.create_time + self.desc + \
+                                self.create_time + self.desc + \
                                 '_' + str(i) + '.jpeg'
                         # 检查图片下载情况
                         if Util.os.path.exists(p_url):

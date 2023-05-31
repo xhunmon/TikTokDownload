@@ -37,6 +37,8 @@ class Profile():
         Util.log.info(Util.platform.system())
         # 接口
         self.urls = Util.Urls()
+        # cxh230527:已下载列表
+        self.downloads = []
 
     def getProfile(self, param):
         """判断个人主页api链接
