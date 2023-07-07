@@ -16,6 +16,7 @@ Change Log  :
 
 import Util
 
+
 ############ apis############
 # /aweme/v1/web/aweme/detail/       'aweme_detail'
 # /aweme/v1/web/aweme/post/         'aweme_list'
@@ -39,6 +40,7 @@ class Profile():
         self.urls = Util.Urls()
         # cxh230527:已下载列表
         self.downloads = []
+        self.is_finish = False
 
     def getProfile(self, param):
         """判断个人主页api链接
@@ -54,6 +56,8 @@ class Profile():
         # cxh230526: 新增代码
         self.interval = param[4]
         self.path = param[6]
+        if self.is_finish:
+            return
         try:
             r = Util.requests.post(url=Util.reFind(param[0])[0])
         except:
@@ -86,8 +90,9 @@ class Profile():
         # datas 为元组 (params, xb)
         # 23/04/20
         # 接口参数更新，旧的拿不到1080p了
-        datas = Util.XBogus('aid=6383&sec_user_id=%s&count=35&max_cursor=0&cookie_enabled=true&platform=PC&downlink=10' % (
-            self.sec))
+        datas = Util.XBogus(
+            'aid=6383&sec_user_id=%s&count=35&max_cursor=0&cookie_enabled=true&platform=PC&downlink=10' % (
+                self.sec))
         response = Util.requests.get(
             url=self.urls.USER_POST + datas.params, headers=self.headers, timeout=3)
 
@@ -116,8 +121,9 @@ class Profile():
             exit()
 
         # 构造第一次访问链接
-        datas = Util.XBogus('aid=6383&sec_user_id=%s&count=35&max_cursor=0&cookie_enabled=true&platform=PC&downlink=10' % (
-            self.sec))
+        datas = Util.XBogus(
+            'aid=6383&sec_user_id=%s&count=35&max_cursor=0&cookie_enabled=true&platform=PC&downlink=10' % (
+                self.sec))
         if self.mode == 'post':
             self.api_post_url = self.urls.USER_POST + datas.params
         else:
@@ -182,6 +188,8 @@ class Profile():
 
                 # 处理第一页视频信息
                 self.getVideoInfo(result)
+                if self.is_finish:
+                    return
             else:
                 self.max_cursor = html['max_cursor']
                 self.getNextData()
@@ -194,8 +202,9 @@ class Profile():
     def getNextData(self):
         """获取下一页api数据
         """
-        datas = Util.XBogus('aid=6383&sec_user_id=%s&count=35&max_cursor=%s&cookie_enabled=true&platform=PC&downlink=10' % (
-            self.sec, self.max_cursor))
+        datas = Util.XBogus(
+            'aid=6383&sec_user_id=%s&count=35&max_cursor=%s&cookie_enabled=true&platform=PC&downlink=10' % (
+                self.sec, self.max_cursor))
         # 构造下一次访问链接
         if self.mode == 'post':
             api_naxt_post_url = self.urls.USER_POST + datas.params
@@ -214,7 +223,7 @@ class Profile():
             print('[  提示  ]:正在对', self.max_cursor, '页进行第 %d 次尝试！\r' % index)
             # 输出日志
             Util.log.info('[  提示  ]:正在对 %s 页进行第 %d 次尝试！' %
-                            (self.max_cursor, index))
+                          (self.max_cursor, index))
             Util.time.sleep(0.5)
             response = Util.requests.get(
                 url=api_naxt_post_url, headers=self.headers)
@@ -233,6 +242,8 @@ class Profile():
                 print('[  提示  ]:第 %d 页抓获数据成功!\r' % self.max_cursor)
                 # 处理下一页视频信息
                 self.getVideoInfo(result)
+                if self.is_finish:
+                    return
             else:
                 self.Isend == True
                 # 输出日志
@@ -300,10 +311,13 @@ class Profile():
         Util.log.info('[  提示  ]:正在替换作者非法字符，耐心等待!')
         # 下载主页所有图集
         datas = Util.Images(self.headers).get_all_images(self.image_list)
-        Util.Download().VideoDownload(self)
+        self.is_finish = Util.Download().VideoDownload(self)
+        if self.is_finish:
+            return
         Util.Download().ImageDownload(datas)
         self.getNextData()
         return  # self,author_list,video_list,uri_list,aweme_id,nickname,max_cursor
+
     # 保存用户主页链接
     def s_homepage(self):
         with open(self.path + self.sprit + self.nickname + '.txt', 'w') as f:

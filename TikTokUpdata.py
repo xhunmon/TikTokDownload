@@ -61,20 +61,21 @@ class Updata:
             self.g_Version = self.l_Version
 
     def get_Updata(self):
-        if self.l_Version == self.g_Version:
-            print('[   🚩   ]:目前 %i 版本已是最新' % self.l_Version)
-            return
-        elif self.l_Version < self.g_Version:
-            isUpdata = input('[   🌋   ]:当前不是最新版本,需要升级吗? (y/n) :')
-            if isUpdata == 'Y' or isUpdata == 'y':
-                print('[   🚩   ]:正在为你下载 %i 版本中，升级前请确保关闭所有打开的项目文件' %
-                        self.g_Version)
-                self.zip_Download()
-            if isUpdata == 'N' or isUpdata == 'n':
-                print('[   🚩   ]:取消升级,旧版可能会出现没有修复的bug')
-                return
-            else:
-                self.get_Updata()
+        pass
+        # if self.l_Version == self.g_Version:
+        #     print('[   🚩   ]:目前 %i 版本已是最新' % self.l_Version)
+        #     return
+        # elif self.l_Version < self.g_Version:
+        #     isUpdata = input('[   🌋   ]:当前不是最新版本,需要升级吗? (y/n) :')
+        #     if isUpdata == 'Y' or isUpdata == 'y':
+        #         print('[   🚩   ]:正在为你下载 %i 版本中，升级前请确保关闭所有打开的项目文件' %
+        #                 self.g_Version)
+        #         self.zip_Download()
+        #     if isUpdata == 'N' or isUpdata == 'n':
+        #         print('[   🚩   ]:取消升级,旧版可能会出现没有修复的bug')
+        #         return
+        #     else:
+        #         self.get_Updata()
 
     # @retry(stop_max_attempt_number=3)
     def zip_Download(self):

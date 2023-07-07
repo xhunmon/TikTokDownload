@@ -108,7 +108,8 @@ class Download():
                         self.path, creat_time, self.author_list[i], ".mp4", profileData)
                     if file_state == True:
                         if 'finish' == finish:  # 当前的视频日期已经小于设定的开始时间，跳出
-                            break
+                            print('已经完成下载 1 ！')
+                            return True
                         v_url = self.path + creat_time + '.mp4'
                         tag_names = [tag['tag_name'] for tag in js['aweme_detail']['video_tag']]
                         tag_name = ','.join(tag_names)
@@ -199,6 +200,7 @@ class Download():
                         Util.log.error('[  提示  ]:该页视频资源没有35个,为你跳过该页！')
                         print('[  提示  ]:该页视频资源没有35个,为你跳过该页！\r')
                         break
+        return False
 
     def ImageDownload(self, datas):
         with Util.progress:

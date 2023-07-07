@@ -36,7 +36,7 @@ class CheckInfo():
             elif creat_date > end_data:
                 print("[  提示  ]:", "目标视频时间：{0}，大于设置初始时间：{1} 跳过下载。".format(creat_time, in_time[1]))
                 return True, 'continue'
-        return Util.os.path.exists(path + creat_time + file_name + file_type), ''
+        return Util.os.path.exists(path + creat_time + file_type), ''
 
 
 if __name__ == '__main__':
